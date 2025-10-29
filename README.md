@@ -64,17 +64,42 @@ FPGA development with Xilinx Vitis involves complex workflows:
 ### Installation
 
 ```bash
-# 1. Clone or copy the templates to your system
-git clone <your-repo-url>
-cd fpga-templates
+# 1. Clone the templates
+git clone https://github.com/abdullahsahruri/xilinx-fpga-templates.git
+cd xilinx-fpga-templates
 
 # 2. Make scripts executable
 chmod +x fpga_build_template.sh fpga_run_template.sh
 
-# 3. Copy to shared location (optional)
-sudo cp fpga_*.sh /opt/xilinx/scripts/
-# Or add to PATH
-export PATH=$PATH:/path/to/fpga-templates
+# 3. Ready to use! Run from this directory or add to your PATH
+```
+
+**Option A: Use directly** (no PATH needed)
+```bash
+# Run from anywhere using full path
+~/xilinx-fpga-templates/fpga_build_template.sh -p my_project -k kernel -s kernel.cpp
+```
+
+**Option B: Add to your personal PATH** (recommended)
+```bash
+# Add to your ~/.bashrc or ~/.bash_profile
+echo 'export PATH=$PATH:$HOME/xilinx-fpga-templates' >> ~/.bashrc
+source ~/.bashrc
+
+# Now use from anywhere
+fpga_build_template.sh -p my_project -k kernel -s kernel.cpp
+```
+
+**Option C: Create aliases** (for shorter commands)
+```bash
+# Add to your ~/.bashrc
+echo 'alias fpga-build="$HOME/xilinx-fpga-templates/fpga_build_template.sh"' >> ~/.bashrc
+echo 'alias fpga-run="$HOME/xilinx-fpga-templates/fpga_run_template.sh"' >> ~/.bashrc
+source ~/.bashrc
+
+# Now use with short commands
+fpga-build -p my_project -k kernel -s kernel.cpp
+fpga-run -p my_project -x kernel.xo -H host.cpp
 ```
 
 ### Basic Usage
