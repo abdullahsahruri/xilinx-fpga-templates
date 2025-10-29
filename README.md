@@ -2,25 +2,25 @@
 
 > **Simplified, reusable shell scripts for building and running Xilinx FPGA designs with Vitis HLS**
 
-Stop memorizing complex v++ commands. Automate your FPGA workflow with simple, battle-tested scripts that handle HLS compilation, kernel linking, host compilation, and execution.
+Automate your FPGA development workflow with battle-tested scripts that handle HLS compilation, kernel linking, host compilation, and execution. Eliminate complex v++ command memorization and streamline the development process.
 
 [![License](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
 [![Vitis](https://img.shields.io/badge/Vitis-2023.2%2B-orange)](https://www.xilinx.com/products/design-tools/vitis.html)
 
 ---
 
-## ✨ Features
+## Features
 
-- ⚡ **Simple Commands** - Build kernels with a single command
-- 🔧 **Auto Platform Detection** - Supports U200, U250, U280, U50, U55C, VCK190
-- 💾 **/tmp Builds** - Avoids disk quota issues (multi-GB temp files)
-- 🎯 **Three Targets** - sw_emu (minutes), hw_emu (hours), hw (production)
-- 📊 **Resource Reporting** - Automatic LUT/FF/BRAM extraction
-- 🚀 **Fast Iteration** - Skip linking/compilation when unchanged
+- **Simple Commands** - Build kernels with a single command
+- **Auto Platform Detection** - Supports U200, U250, U280, U50, U55C, VCK190
+- **/tmp Builds** - Avoids disk quota issues (multi-GB temp files)
+- **Three Targets** - sw_emu (minutes), hw_emu (hours), hw (production)
+- **Resource Reporting** - Automatic LUT/FF/BRAM extraction
+- **Fast Iteration** - Skip linking/compilation when unchanged
 
 ---
 
-## 🚀 Quick Start
+## Quick Start
 
 ```bash
 # 1. Clone repository
@@ -55,7 +55,7 @@ chmod +x fpga_build_template.sh fpga_run_template.sh
 
 ---
 
-## 📚 Documentation
+## Documentation
 
 ### Getting Started
 - **[Quick Start Guide](docs/QUICK_START.md)** - Installation and basic usage
@@ -73,22 +73,22 @@ chmod +x fpga_build_template.sh fpga_run_template.sh
 
 ---
 
-## 🎯 What Problem Does This Solve?
+## Problem Statement
 
 FPGA development with Xilinx Vitis is powerful but complex:
 
-| Problem | This Solution |
-|---------|---------------|
-| ❌ Complex v++ commands | ✅ Simple one-liners |
-| ❌ Disk quota exceeded | ✅ Auto /tmp usage |
-| ❌ Remembering platform strings | ✅ Auto-detection |
-| ❌ 4-hour builds for debugging | ✅ sw_emu in 3 minutes |
-| ❌ Manual environment setup | ✅ Auto-sourcing Vitis/XRT |
-| ❌ Rebuilding everything | ✅ Skip unchanged steps |
+| Challenge | Solution |
+|-----------|----------|
+| Complex v++ commands | Simple one-line commands |
+| Disk quota exceeded | Automatic /tmp usage |
+| Remembering platform strings | Automatic platform detection |
+| 4-hour builds for debugging | sw_emu completes in 3 minutes |
+| Manual environment setup | Automatic Vitis/XRT sourcing |
+| Rebuilding unchanged components | Skip unchanged steps |
 
 ---
 
-## 🎓 Build Targets Comparison
+## Build Targets Comparison
 
 | Target | Time | Purpose | Use When |
 |--------|------|---------|----------|
@@ -104,7 +104,7 @@ FPGA development with Xilinx Vitis is powerful but complex:
 
 ---
 
-## 📦 What's Included
+## Repository Contents
 
 ```
 xilinx-fpga-templates/
@@ -127,9 +127,9 @@ xilinx-fpga-templates/
 
 ---
 
-## 🌟 Example: Vector Addition
+## Example: Vector Addition
 
-**Complete working example included!**
+Complete working example included:
 
 ```bash
 cd examples/vector_add
@@ -147,17 +147,17 @@ cd examples/vector_add
 
 ---
 
-## 💡 Quick Tips
+## Best Practices
 
-1. **Always start with sw_emu** - Catch bugs in minutes, not hours
-2. **Use hw_emu before hw** - Validate resources before 4-hour builds
-3. **Enable auto-cleanup** - Add `-c` flag to save disk space
-4. **Check resources early** - `grep "LUT" results/reports/*/system_estimate*.xtxt`
-5. **Skip unnecessary steps** - Use `--skip-link` if kernel unchanged
+1. **Start with sw_emu** - Validate functional correctness in minutes rather than hours
+2. **Use hw_emu before hw** - Verify resource utilization before lengthy hardware builds
+3. **Enable auto-cleanup** - Use `-c` flag to conserve disk space
+4. **Check resources early** - Run `grep "LUT" results/reports/*/system_estimate*.xtxt` after hw_emu
+5. **Skip unchanged steps** - Use `--skip-link` when only host code has been modified
 
 ---
 
-## 🎯 Supported Platforms
+## Supported Platforms
 
 | Board | Flag | Memory | Use Case |
 |-------|------|--------|----------|
@@ -172,7 +172,7 @@ cd examples/vector_add
 
 ---
 
-## 🔗 Integration with Xilinx Examples
+## Integration with Xilinx Examples
 
 These templates work seamlessly with official Xilinx repositories:
 
@@ -193,26 +193,26 @@ cd Vitis_Accel_Examples/host_xrt/hello_world
 
 ---
 
-## ❓ FAQ
+## Frequently Asked Questions
 
 **Q: Do I need to modify the scripts for my project?**
-A: No! Scripts are completely generic. Just specify your files as arguments.
+A: No. The scripts are completely generic. Specify your project name, kernel name, and source files as command-line arguments.
 
 **Q: Can I use these with existing Makefiles?**
-A: Yes. Call scripts from Makefiles or see examples in docs.
+A: Yes. The scripts can be invoked from Makefiles or CI/CD pipelines. See documentation for examples.
 
 **Q: What if I have a custom platform?**
-A: Use `-P platform_full_name` to specify the exact platform string.
+A: Use the `-P platform_full_name` option to specify the exact platform string.
 
 **Q: How do I add custom v++ flags?**
-A: Edit the `run_hls_synthesis()` or `link_kernels()` functions in the scripts.
+A: Modify the `run_hls_synthesis()` or `link_kernels()` functions in the respective scripts.
 
 **Q: What versions of Vitis are supported?**
-A: Tested with Vitis 2023.2 and 2024.1+. Should work with any recent version.
+A: Tested with Vitis 2023.2 and 2024.1+. Compatible with most recent Vitis versions.
 
 ---
 
-## 🐛 Troubleshooting
+## Troubleshooting
 
 ### Common Issues
 
@@ -241,17 +241,17 @@ grep "LUT" results/reports/*/system_estimate*.xtxt
 
 ---
 
-## 🤝 Contributing
+## Contributing
 
-Contributions welcome! Areas for improvement:
-- Additional board support
-- More examples (matrix multiply, FIR filter)
-- Automated resource checking
-- Docker container support
+Contributions are welcome. Areas for improvement include:
+- Additional board support (Versal, Zynq UltraScale+)
+- Additional examples (matrix multiplication, FIR filters, image processing)
+- Automated resource checking with warnings
+- Docker container support for reproducible builds
 
 ---
 
-## 📄 License
+## License
 
 This project is provided as-is for educational and research purposes.
 
@@ -259,28 +259,22 @@ For Xilinx/AMD tool licenses, refer to your Vitis installation agreement.
 
 ---
 
-## 🙏 Acknowledgments
+## Acknowledgments
 
-- **AMD/Xilinx** for Vitis HLS and comprehensive documentation
-- **Xilinx Example Repositories** for reference implementations
-- FPGA developer community for feedback and testing
+This work builds upon:
+- AMD/Xilinx for Vitis HLS tools and comprehensive documentation
+- Xilinx Example Repositories for reference implementations and design patterns
+- The FPGA development community for feedback and contributions
 
 ---
 
-## 📞 Support
+## Support
 
-**For template issues:**
+**For template-related issues:**
 - Open an issue: https://github.com/abdullahsahruri/xilinx-fpga-templates/issues
-- Check documentation: [docs/](docs/)
+- Consult documentation: [docs/](docs/)
 
 **For Xilinx Vitis issues:**
 - [Vitis Documentation](https://docs.xilinx.com/r/en-US/ug1416-vitis-documentation)
-- [Xilinx Forums](https://support.xilinx.com/s/topic/0TO2E000000YKY3WAO/vitis-acceleration)
+- [Xilinx Support Forums](https://support.xilinx.com/s/topic/0TO2E000000YKY3WAO/vitis-acceleration)
 - [AMD Developer Zone](https://developer.amd.com/xilinx/)
-
----
-
-<p align="center">
-  <strong>Built for the FPGA development community</strong><br>
-  <sub>Simplifying FPGA workflows, one script at a time</sub>
-</p>

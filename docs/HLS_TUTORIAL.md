@@ -3,10 +3,10 @@
 ## What is HLS (High-Level Synthesis)?
 
 HLS lets you write FPGA accelerators in **C/C++** instead of Verilog/VHDL:
-- ✅ Write algorithms in familiar languages
-- ✅ Use pragmas to control hardware behavior
-- ✅ Vitis HLS generates RTL automatically
-- ✅ Faster development than traditional HDL
+-  Write algorithms in familiar languages
+-  Use pragmas to control hardware behavior
+-  Vitis HLS generates RTL automatically
+-  Faster development than traditional HDL
 
 ---
 
@@ -223,21 +223,21 @@ cat results/reports/PROJECT/KERNEL/system_estimate_KERNEL.xtxt
 ```
 
 **Solutions:**
-- ❌ Reduce parallelization (lower ARRAY_PARTITION factor)
-- ❌ Reduce PIPELINE unrolling
-- ❌ Use fewer memory ports
-- ❌ Simplify complex operations
+-  Reduce parallelization (lower ARRAY_PARTITION factor)
+-  Reduce PIPELINE unrolling
+-  Use fewer memory ports
+-  Simplify complex operations
 
 **Example:** Change `factor=32` to `factor=16`
 
 ### If Performance Is Low
 
 **Solutions:**
-- ✅ Add PIPELINE pragmas to loops
-- ✅ Increase ARRAY_PARTITION factor
-- ✅ Use multiple memory bundles
-- ✅ Check II (should be 1 for best throughput)
-- ✅ Add DATAFLOW for multi-function designs
+-  Add PIPELINE pragmas to loops
+-  Increase ARRAY_PARTITION factor
+-  Use multiple memory bundles
+-  Check II (should be 1 for best throughput)
+-  Add DATAFLOW for multi-function designs
 
 ### Resource Limits (Alveo U200)
 
@@ -261,10 +261,10 @@ DSP:  < 6,840     (out of 6,840)
 ./fpga_run_template.sh -p test -x results/kernels/kernel.xo -H host.cpp -t sw_emu -c
 ```
 
-- ⚡ **Time:** 1-5 minutes
-- 🎯 **Purpose:** Functional testing
-- 💻 **How:** Runs kernel as CPU code
-- ✅ **Use for:** Bug fixing, algorithm validation
+-  **Time:** 1-5 minutes
+- **Purpose:** Functional testing
+-  **How:** Runs kernel as CPU code
+-  **Use for:** Bug fixing, algorithm validation
 
 ### 2. Hardware Emulation (hw_emu)
 
@@ -277,10 +277,10 @@ grep "LUT\|FF\|BRAM\|DSP" results/reports/test/kernel/system_estimate*.xtxt
 ./fpga_run_template.sh -p test -x results/kernels/kernel.xo -H host.cpp -t hw_emu -c
 ```
 
-- ⏱️ **Time:** 30-60 minutes
-- 🎯 **Purpose:** Performance validation
-- 🔧 **How:** Full HLS synthesis + RTL simulation
-- ✅ **Use for:** Optimization, resource checking
+-  **Time:** 30-60 minutes
+- **Purpose:** Performance validation
+-  **How:** Full HLS synthesis + RTL simulation
+-  **Use for:** Optimization, resource checking
 
 ### 3. Hardware (hw)
 
@@ -289,10 +289,10 @@ grep "LUT\|FF\|BRAM\|DSP" results/reports/test/kernel/system_estimate*.xtxt
 ./fpga_run_template.sh -p test -x results/kernels/kernel.xo -H host.cpp -t hw -c
 ```
 
-- 🐌 **Time:** 2-6 hours
-- 🎯 **Purpose:** Production deployment
-- 🏭 **How:** Full FPGA place & route
-- ✅ **Use for:** Final builds, real hardware testing
+-  **Time:** 2-6 hours
+- **Purpose:** Production deployment
+-  **How:** Full FPGA place & route
+-  **Use for:** Final builds, real hardware testing
 
 ---
 

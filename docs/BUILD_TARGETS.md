@@ -24,22 +24,22 @@ Your C++ kernel → Compiled as CPU code → Runs on host processor
 ```
 
 ### Characteristics
-- ⚡ **Fast:** 1-5 minutes to build
-- 💻 **Where:** Runs on CPU (no FPGA synthesis)
-- ✅ **Good for:** Algorithm correctness, debugging logic
-- ❌ **Not good for:** Performance estimation, resource usage
+-  **Fast:** 1-5 minutes to build
+-  **Where:** Runs on CPU (no FPGA synthesis)
+-  **Good for:** Algorithm correctness, debugging logic
+-  **Not good for:** Performance estimation, resource usage
 
 ### When to Use
 
-✅ **Initial development**
+ **Initial development**
 ```bash
 ./fpga_build_template.sh -p dev -k kernel -s kernel.cpp -t sw_emu -c
 ./fpga_run_template.sh -p dev -x results/kernels/kernel.xo -H host.cpp -t sw_emu -c
 ```
 
-✅ **Rapid bug fixing** - Fix bugs in minutes, not hours
-✅ **Testing new algorithms** - Validate correctness quickly
-✅ **Debugging host-kernel communication**
+ **Rapid bug fixing** - Fix bugs in minutes, not hours
+ **Testing new algorithms** - Validate correctness quickly
+ **Debugging host-kernel communication**
 
 ### Example Workflow
 
@@ -71,19 +71,19 @@ Your C++ kernel → HLS synthesis → RTL generation → RTL simulation
 ```
 
 ### Characteristics
-- ⏱️ **Moderate:** 30-60 minutes to build
-- 🔧 **Where:** Full hardware synthesis, simulated execution
-- ✅ **Good for:** Performance tuning, resource estimation, optimization
-- ❌ **Not good for:** Rapid iteration (too slow)
+-  **Moderate:** 30-60 minutes to build
+-  **Where:** Full hardware synthesis, simulated execution
+-  **Good for:** Performance tuning, resource estimation, optimization
+-  **Not good for:** Rapid iteration (too slow)
 
 ### When to Use
 
-✅ **After sw_emu passes** - Algorithm is correct, now optimize
+ **After sw_emu passes** - Algorithm is correct, now optimize
 ```bash
 ./fpga_build_template.sh -p opt -k kernel -s kernel.cpp -t hw_emu -c
 ```
 
-✅ **Checking resource usage**
+ **Checking resource usage**
 ```bash
 # After build completes
 cat results/reports/opt/kernel/system_estimate_kernel.xtxt
@@ -94,9 +94,9 @@ cat results/reports/opt/kernel/system_estimate_kernel.xtxt
 # - BRAM usage (should be < 2000 on U200)
 ```
 
-✅ **Validating HLS pragmas** - Does PIPELINE help? Is II=1 achieved?
+ **Validating HLS pragmas** - Does PIPELINE help? Is II=1 achieved?
 
-✅ **Performance estimation** - Check latency and throughput
+ **Performance estimation** - Check latency and throughput
 
 ### Example Workflow
 
@@ -131,23 +131,23 @@ Your C++ kernel → HLS synthesis → RTL generation → Place & Route → Bitst
 ```
 
 ### Characteristics
-- 🐌 **Slow:** 2-6 hours to build
-- 🏭 **Where:** Full FPGA compilation (place & route)
-- ✅ **Good for:** Final deployment, real performance measurement
-- ❌ **Not good for:** Debugging, iteration (way too slow)
+-  **Slow:** 2-6 hours to build
+-  **Where:** Full FPGA compilation (place & route)
+-  **Good for:** Final deployment, real performance measurement
+-  **Not good for:** Debugging, iteration (way too slow)
 
 ### When to Use
 
-✅ **After hw_emu passes** - Design is optimized and fits
+ **After hw_emu passes** - Design is optimized and fits
 ```bash
 ./fpga_build_template.sh -p prod -k kernel -s kernel.cpp -t hw -c
 ```
 
-✅ **Final performance testing** - Measure real-world speed
+ **Final performance testing** - Measure real-world speed
 
-✅ **Production deployment** - Create bitstreams for deployment
+ **Production deployment** - Create bitstreams for deployment
 
-❌ **Never use for debugging** - Use sw_emu instead
+ **Never use for debugging** - Use sw_emu instead
 
 ### Example Workflow
 
@@ -219,7 +219,7 @@ tar -czf final_v1.0_hw.tar.gz results/ *.xclbin
 
 ## Time Savings Example
 
-### ❌ Wrong Way: Building hw Every Time
+###  Wrong Way: Building hw Every Time
 
 ```
 Iteration 1: hw build (4 hours) → Find bug → Fix
@@ -231,7 +231,7 @@ Iteration 5: hw build (4 hours) → Finally works!
 Total time: 20 hours (2.5 days)
 ```
 
-### ✅ Right Way: Using sw_emu → hw_emu → hw
+###  Right Way: Using sw_emu → hw_emu → hw
 
 ```
 sw_emu iterations (10x @ 3 min each) = 30 minutes → Algorithm correct
@@ -246,7 +246,7 @@ Saved: 11.5 hours (58% faster!)
 
 ## Common Mistakes to Avoid
 
-### ❌ Mistake 1: Using hw for Debugging
+###  Mistake 1: Using hw for Debugging
 
 ```bash
 # This is WRONG - wasting hours!
@@ -255,14 +255,14 @@ Saved: 11.5 hours (58% faster!)
 # Fix and rebuild... another 4 hours wasted!
 ```
 
-**✅ Instead:**
+** Instead:**
 ```bash
 # Start with sw_emu - fix bugs in minutes
 ./fpga_build_template.sh -t sw_emu ...  # 3 minutes
 # Fix bugs quickly, then move to hw_emu
 ```
 
-### ❌ Mistake 2: Skipping hw_emu
+###  Mistake 2: Skipping hw_emu
 
 ```bash
 # This is WRONG
@@ -271,7 +271,7 @@ Saved: 11.5 hours (58% faster!)
 # Error: Routing failed - too many LUTs!
 ```
 
-**✅ Instead:**
+** Instead:**
 ```bash
 # Use hw_emu to catch resource issues early
 ./fpga_build_template.sh -t sw_emu ...  # Works!
@@ -280,14 +280,14 @@ grep "LUT" results/reports/*/system_estimate*.xtxt  # Check before hw build
 ./fpga_build_template.sh -t hw ...      # Now confident it will work!
 ```
 
-### ❌ Mistake 3: Large Datasets in hw_emu
+###  Mistake 3: Large Datasets in hw_emu
 
 ```bash
 # hw_emu is RTL simulation - very slow for large data
 ./fpga_run_template.sh -t hw_emu ... # Takes hours to simulate!
 ```
 
-**✅ Instead:**
+** Instead:**
 ```bash
 # Use small representative datasets in hw_emu
 # Use full datasets only in sw_emu and hw
