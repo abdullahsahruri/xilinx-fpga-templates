@@ -139,21 +139,21 @@ fpga-run -p my_project -x kernel.xo -H host.cpp
 
 # Build kernel for hardware emulation
 ./fpga_build_template.sh \
-    -p vector_add \
-    -k vadd \
-    -s vector_add.cpp \
-    -b u200 \
-    -t hw_emu \
-    -c
+    -p vector_add \          # Project name for organizing results
+    -k vadd \                # Kernel function name in your code
+    -s vector_add.cpp \      # Source file containing kernel
+    -b u200 \                # Target board (Alveo U200)
+    -t hw_emu \              # Hardware emulation (validates performance)
+    -c                       # Auto-cleanup temporary files
 
 # Link kernel and run
 ./fpga_run_template.sh \
-    -p vector_add \
-    -x "results/kernels/vadd.xo" \
-    -H host.cpp \
-    -B u200 \
-    -t hw_emu \
-    -c
+    -p vector_add \          # Same project name
+    -x "results/kernels/vadd.xo" \  # Compiled kernel from build step
+    -H host.cpp \            # Host application source
+    -B u200 \                # Same target board
+    -t hw_emu \              # Same target (hardware emulation)
+    -c                       # Auto-cleanup temporary files
 
 # Expected output: "TEST PASSED"
 ```
