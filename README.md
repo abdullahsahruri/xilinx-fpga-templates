@@ -279,72 +279,9 @@ Optional:
 
 ---
 
-## 🌟 Real-World Examples
+## 🌟 Usage Examples
 
-### Example 1: HDC Classifier (Hyperdimensional Computing)
-
-```bash
-# Build 16-way parallel HDC kernel
-./fpga_build_template.sh \
-    -p hdc_16way \
-    -k hdc_kernel_integrated \
-    -s hdc_kernel_16way.cpp \
-    -b u200 \
-    -t hw_emu \
-    -o 3
-
-# Check resource utilization
-cat results/reports/hdc_16way/*/system_estimate*.xtxt
-# Output: FF=350,218, LUT=386,083, BRAM=17
-
-# Link and run
-./fpga_run_template.sh \
-    -p hdc_16way \
-    -x "results/kernels/hdc_kernel_integrated.xo" \
-    -H host_hdc.cpp \
-    -B u200 \
-    -t hw_emu
-```
-
-### Example 2: Matrix Multiplication (Optimization Comparison)
-
-```bash
-# Baseline: No optimization
-./fpga_build_template.sh -p matmul_baseline -k matmul -s matmul.cpp -t hw_emu
-
-# Optimized: With ARRAY_PARTITION
-# Edit matmul.cpp: Add #pragma HLS ARRAY_PARTITION variable=a block factor=16
-./fpga_build_template.sh -p matmul_optimized -k matmul -s matmul_opt.cpp -t hw_emu
-
-# Compare resources
-echo "=== Baseline ===" && grep "LUT" results/reports/matmul_baseline/*/system_estimate*.xtxt
-echo "=== Optimized ===" && grep "LUT" results/reports/matmul_optimized/*/system_estimate*.xtxt
-
-# Run best version
-./fpga_run_template.sh -p matmul_optimized -x results/kernels/matmul.xo -H host.cpp -t hw_emu
-```
-
-### Example 3: Multi-Kernel Pipeline
-
-```bash
-# Build encoder kernel
-./fpga_build_template.sh -p encoder -k encode -s encoder.cpp -b u250 -t hw_emu -c
-
-# Build decoder kernel
-./fpga_build_template.sh -p decoder -k decode -s decoder.cpp -b u250 -t hw_emu -c
-
-# Link both kernels together
-./fpga_run_template.sh \
-    -p codec_pipeline \
-    -x "results/kernels/encode.xo results/kernels/decode.xo" \
-    -H host_pipeline.cpp \
-    -B u250 \
-    -t hw_emu \
-    -b codec.xclbin \
-    -c
-```
-
-### Example 4: Quick Re-runs (Development Iteration)
+### Example 1: Quick Re-runs (Development Iteration)
 
 ```bash
 # Initial build and run
