@@ -1,0 +1,46 @@
+# Build artifacts
+results/
+*.xclbin
+*.xo
+*.exe
+*.log
+emconfig.json
+xsim.wdb
+*.csv
+*.pb
+*.dat
+
+# Temporary directories
+_x/
+.Xil/
+.run/
+
+# IDE and editor files
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.DS_Store
+
+# Vitis generated files
+profile_summary.*
+timeline_trace.*
+xrt.ini
+*.compile_summary
+*.link_summary
+
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+
+# Object files
+*.o
+*.a
+*.so
+
+# System files
+.directory
+Thumbs.db
