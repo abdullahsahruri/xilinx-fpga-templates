@@ -155,12 +155,18 @@ Complete working example included:
 cd examples/vector_add
 
 # Software emulation (fastest - validates logic)
-../../fpga_build_template.sh -p vector_add -k vadd -s vector_add.cpp -b u200 -t sw_emu -c
-../../fpga_run_template.sh -p vector_add -x "results/kernels/vadd.xo" -H host.cpp -B u200 -t sw_emu -c
+../../fpga_build_template.sh -p vector_add -k vadd -s vector_add.cpp -b u200 -t sw_emu
+../../fpga_run_template.sh -p vector_add -x "results/kernels/vadd.xo" -H host.cpp -B u200 -t sw_emu
 
 # Hardware emulation (checks resources & performance)
-../../fpga_build_template.sh -p vector_add -k vadd -s vector_add.cpp -b u200 -t hw_emu -c
-../../fpga_run_template.sh -p vector_add -x "results/kernels/vadd.xo" -H host.cpp -B u200 -t hw_emu -c
+../../fpga_build_template.sh -p vector_add -k vadd -s vector_add.cpp -b u200 -t hw_emu
+../../fpga_run_template.sh -p vector_add -x "results/kernels/vadd.xo" -H host.cpp -B u200 -t hw_emu
+
+# Extract resources
+../../fpga_extract_resources.sh --project vector_add
+
+# Cleanup when done
+../../fpga_cleanup_builds.sh
 ```
 
 **[See complete example with code explanations →](examples/vector_add/README.md)**
@@ -171,8 +177,8 @@ cd examples/vector_add
 
 1. **Start with sw_emu** - Validate functional correctness in minutes rather than hours
 2. **Use hw_emu before hw** - Verify resource utilization before lengthy hardware builds
-3. **Enable auto-cleanup** - Use `-c` flag to conserve disk space
-4. **Check resources early** - Run `grep "LUT" results/reports/*/system_estimate*.xtxt` after hw_emu
+3. **Extract resources first** - Always run `./fpga_extract_resources.sh` before cleanup
+4. **Clean up manually** - Use `./fpga_cleanup_builds.sh` to free disk space when done
 5. **Skip unchanged steps** - Use `--skip-link` when only host code has been modified
 
 ---
