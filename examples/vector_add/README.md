@@ -21,6 +21,7 @@ Result:   [0, 3, 6, 9, ...]
 - `vector_add.cpp` - HLS kernel (runs on FPGA)
 - `test_vadd.cpp` - Standalone testbench for Phase 1 & 2
 - `csim.tcl` - Vitis HLS C Simulation script for Phase 2
+- `setup_env.sh` - Environment setup helper for each phase
 - `host.cpp` - XRT host application for Phase 3 & 4 (runs on CPU, controls FPGA)
 - `README.md` - This file
 
@@ -116,6 +117,9 @@ INFO: [SIM 211-3] *************** CSIM finish ***************
 **Goal:** Validate resource usage and system integration
 
 ```bash
+# Setup environment (sources Vitis and sets XCL_EMULATION_MODE)
+source setup_env.sh 3
+
 # Build kernel (hw_emu performs full HLS synthesis)
 ../../fpga_build_template.sh \
     -p vector_add \
