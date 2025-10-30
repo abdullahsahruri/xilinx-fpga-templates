@@ -32,7 +32,7 @@ See [CSIM_GUIDE.md](docs/CSIM_GUIDE.md) for complete workflow details.
 - **Simple Commands** - Build kernels with a single command
 - **Auto Platform Detection** - Supports U200, U250, U280, U50, U55C, VCK190
 - **/tmp Builds** - Avoids disk quota issues (multi-GB temp files)
-- **Three Targets** - sw_emu (minutes), hw_emu (hours), hw (production)
+- **Two Targets** - hw_emu (hours), hw (production)
 - **Resource Reporting** - Automatic LUT/FF/BRAM extraction
 - **Fast Iteration** - Skip linking/compilation when unchanged
 
@@ -109,15 +109,15 @@ FPGA development with Xilinx Vitis is powerful but complex:
 
 | Target | Time | Purpose | Use When |
 |--------|------|---------|----------|
-| **sw_emu** | 1-5 min | Functional testing | Debugging, initial development |
-| **hw_emu** | 30-60 min | Performance validation | Optimization, resource checking |
-| **hw** | 2-6 hours | Production | Final deployment |
+| **g++ + csim** | seconds-minutes | Functional testing | Debugging, initial development (Phase 1 & 2) |
+| **hw_emu** | 30-60 min | Performance validation | Optimization, resource checking (Phase 3) |
+| **hw** | 2-6 hours | Production | Final deployment (Phase 4) |
 
-**Development workflow:** sw_emu (fix bugs) → hw_emu (optimize) → hw (deploy)
+**Development workflow:** g++ (iterate) → vitis_hls csim (validate) → hw_emu (optimize) → hw (deploy)
 
-**Time savings:** Following this workflow saves **5-10 days** compared to building hardware every time.
+**Time savings:** Using g++ + csim instead of hw_emu for early iterations is **60x faster**.
 
-**[Learn more about build targets →](docs/BUILD_TARGETS.md)**
+**[Learn more about the 4-phase workflow →](docs/CSIM_GUIDE.md)**
 
 ---
 
@@ -153,10 +153,6 @@ Complete working example included:
 
 ```bash
 cd examples/vector_add
-
-# Software emulation (fastest - validates logic)
-../../fpga_build_template.sh -p vector_add -k vadd -s vector_add.cpp -b u200 -t sw_emu
-../../fpga_run_template.sh -p vector_add -x "results/kernels/vadd.xo" -H host.cpp -B u200 -t sw_emu
 
 # Hardware emulation (checks resources & performance)
 ../../fpga_build_template.sh -p vector_add -k vadd -s vector_add.cpp -b u200 -t hw_emu

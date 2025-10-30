@@ -20,7 +20,7 @@ SOURCE_FILE="${SOURCE_FILE:-kernel.cpp}"
 # Xilinx settings
 BOARD="${BOARD:-u200}"  # Default board: u200, u250, u280, u50, u55c, vck190, or custom
 PLATFORM="${PLATFORM:-}"  # Will be auto-detected based on BOARD
-TARGET="${TARGET:-hw_emu}"  # hw_emu, hw, sw_emu
+TARGET="${TARGET:-hw_emu}"  # hw_emu or hw
 OPTIMIZE_LEVEL="${OPTIMIZE_LEVEL:-3}"
 
 # Directory settings
@@ -191,34 +191,24 @@ run_hls_synthesis() {
     print_info "Target: ${TARGET}"
     print_info "Build directory: ${TMP_BUILD_DIR}"
 
-    # Check for sw_emu deprecation
+    # Validate target (only hw_emu and hw supported)
     if [ "${TARGET}" == "sw_emu" ]; then
+        print_error "sw_emu is no longer supported (removed in Vitis 2025.1)"
         echo ""
-        echo "╔═══════════════════════════════════════════════════════════════════════╗"
-        echo "║                          DEPRECATION WARNING                          ║"
-        echo "╠═══════════════════════════════════════════════════════════════════════╣"
-        echo "║  sw_emu is DEPRECATED starting Vitis 2024.2                           ║"
-        echo "║  sw_emu will be REMOVED in Vitis 2025.1                               ║"
-        echo "║                                                                       ║"
-        echo "║  RECOMMENDED: Use HLS C Simulation instead                            ║"
-        echo "║    g++ -std=c++14 -I. kernel.cpp kernel_test.cpp -o test && ./test   ║"
-        echo "║                                                                       ║"
-        echo "║  Benefits:                                                            ║"
-        echo "║    - 60x faster (seconds vs minutes)                                  ║"
-        echo "║    - Standard C++ debugging (gdb, valgrind)                           ║"
-        echo "║    - No Xilinx tool overhead                                          ║"
-        echo "║    - CI/CD friendly                                                   ║"
-        echo "║                                                                       ║"
-        echo "║  Migration Guide: docs/SW_EMU_MIGRATION.md                            ║"
-        echo "║  Xilinx Answer Record: 000036790                                      ║"
-        echo "╚═══════════════════════════════════════════════════════════════════════╝"
+        print_info "Use Phase 1 & 2 workflow instead:"
+        print_info "  Phase 1 (g++):          Fast C++ testing (seconds)"
+        print_info "  Phase 2 (vitis_hls):    HLS C Simulation (minutes)"
+        print_info "  Phase 3 (hw_emu):       Hardware emulation (hours)"
+        print_info "  Phase 4 (hw):           Hardware build (production)"
         echo ""
-        read -p "Continue with deprecated sw_emu build? (y/N): " -n 1 -r
-        echo
-        if [[ ! $REPLY =~ ^[Yy]$ ]]; then
-            print_info "Build cancelled. Please migrate to HLS C Simulation."
-            exit 0
-        fi
+        print_info "See docs/CSIM_GUIDE.md for migration guide"
+        exit 1
+    fi
+
+    if [ "${TARGET}" != "hw_emu" ] && [ "${TARGET}" != "hw" ]; then
+        print_error "Invalid target: ${TARGET}"
+        print_info "Supported targets: hw_emu, hw"
+        exit 1
     fi
 
     # Change to project directory (where source files are)
@@ -416,7 +406,7 @@ Options:
   -p, --project NAME      Project name (default: my_fpga_project)
   -k, --kernel NAME       Kernel name (default: my_kernel)
   -s, --source FILE       Source file (default: kernel.cpp)
-  -t, --target TYPE       Target type: hw_emu, hw, sw_emu (default: hw_emu)
+  -t, --target TYPE       Target type: hw_emu, hw (default: hw_emu)
   -P, --platform NAME     Platform name (default: xilinx_u200_gen3x16_xdma_2_202110_1)
   -o, --optimize LEVEL    Optimization level 0-3 (default: 3)
   -d, --dir PATH          Project directory (default: current directory)

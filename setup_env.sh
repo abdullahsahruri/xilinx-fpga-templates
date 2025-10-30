@@ -178,14 +178,23 @@ fi
 echo ""
 
 # 4. Set emulation mode
+if [ "$MODE" = "sw_emu" ]; then
+    echo -e "${RED}✗ sw_emu is no longer supported${NC}"
+    echo "  sw_emu was removed in Vitis 2025.1"
+    echo ""
+    echo "  Use Phase 1 & 2 workflow instead:"
+    echo "    Phase 1 (g++):        Fast C++ testing (seconds)"
+    echo "    Phase 2 (vitis_hls):  HLS C Simulation (minutes)"
+    echo "    Phase 3 (hw_emu):     Hardware emulation (hours)"
+    echo "    Phase 4 (hw):         Hardware build (production)"
+    return 1
+fi
+
 export XCL_EMULATION_MODE="$MODE"
 echo -e "${GREEN}✓ Emulation mode set${NC}"
 echo "  Mode: $MODE"
 
 case $MODE in
-    sw_emu)
-        echo "  Purpose: Software emulation (fastest, functional validation)"
-        ;;
     hw_emu)
         echo "  Purpose: Hardware emulation (resource estimates, performance)"
         ;;
@@ -193,7 +202,7 @@ case $MODE in
         echo "  Purpose: Hardware build (actual implementation)"
         ;;
     *)
-        echo -e "${YELLOW}  Note: Unknown mode '$MODE'${NC}"
+        echo -e "${YELLOW}  Note: Only hw_emu and hw modes are supported${NC}"
         ;;
 esac
 
