@@ -45,8 +45,8 @@ See [CSIM_GUIDE.md](docs/CSIM_GUIDE.md) for complete workflow details.
 git clone https://github.com/abdullahsahruri/xilinx-fpga-templates.git
 cd xilinx-fpga-templates
 
-# 2. Make scripts executable
-chmod +x fpga_build_template.sh fpga_run_template.sh
+# 2. Setup environment (optional - scripts auto-source tools)
+source setup_env.sh u200 hw_emu
 
 # 3. Build kernel
 ./fpga_build_template.sh \
@@ -54,8 +54,7 @@ chmod +x fpga_build_template.sh fpga_run_template.sh
     -k vadd \
     -s vector_add.cpp \
     -b u200 \
-    -t hw_emu \
-    -c
+    -t hw_emu
 
 # 4. Link and run
 ./fpga_run_template.sh \
@@ -63,8 +62,7 @@ chmod +x fpga_build_template.sh fpga_run_template.sh
     -x "results/kernels/vadd.xo" \
     -H host.cpp \
     -B u200 \
-    -t hw_emu \
-    -c
+    -t hw_emu
 
 # Expected output: "TEST PASSED"
 ```
@@ -76,6 +74,7 @@ chmod +x fpga_build_template.sh fpga_run_template.sh
 ## Documentation
 
 ### Getting Started
+- **[Complete Workflow Guide](docs/WORKFLOW.md)** - End-to-end workflow from setup to cleanup
 - **[Quick Start Guide](docs/QUICK_START.md)** - Installation and basic usage
 - **[Complete Example](examples/vector_add/README.md)** - Full walkthrough with code
 
@@ -126,8 +125,10 @@ FPGA development with Xilinx Vitis is powerful but complex:
 
 ```
 xilinx-fpga-templates/
+├── setup_env.sh                  # Source Vitis/XRT & set platform
 ├── fpga_build_template.sh        # Build kernels (C++ → .xo)
 ├── fpga_run_template.sh          # Link + compile + run
+├── fpga_extract_resources.sh     # Extract resource reports
 ├── fpga_cleanup_builds.sh        # Clean /tmp build files
 ├── README.md                     # This file
 ├── docs/
@@ -173,6 +174,54 @@ cd examples/vector_add
 3. **Enable auto-cleanup** - Use `-c` flag to conserve disk space
 4. **Check resources early** - Run `grep "LUT" results/reports/*/system_estimate*.xtxt` after hw_emu
 5. **Skip unchanged steps** - Use `--skip-link` when only host code has been modified
+
+---
+
+## Extracting Resource Data
+
+After hw_emu or hw builds complete, extract resource utilization data before cleanup:
+
+```bash
+# Interactive mode - select which build to extract
+./fpga_extract_resources.sh
+
+# Extract all builds
+./fpga_extract_resources.sh --all
+
+# Extract specific project
+./fpga_extract_resources.sh --project vector_add
+
+# Save to file
+./fpga_extract_resources.sh --all --output resources.txt
+
+# Export as CSV for spreadsheet analysis
+./fpga_extract_resources.sh --all --format csv --output resources.csv
+
+# Export as Markdown table for documentation
+./fpga_extract_resources.sh --all --format markdown --output resources.md
+```
+
+The script will extract:
+- **Build type** (hw_emu or hw) - automatically detected
+- Target and estimated clock frequencies
+- **hw_emu builds**: Estimated resource utilization
+- **hw builds**: Both estimated AND actual post-implementation resources
+- Resource utilization (LUT, FF, DSP, BRAM, URAM)
+- Timing information
+- Build-specific details
+
+**Example output for hw builds:**
+```
+Build: my_kernel
+Type: hw
+  Estimated Resources: 196K LUT, 183K FF
+  Actual Resources:    198K LUT, 185K FF  (post-implementation)
+```
+
+Supports three output formats:
+- **text**: Human-readable detailed output (default)
+- **csv**: Comma-separated values for Excel/spreadsheets
+- **markdown**: Formatted tables for documentation
 
 ---
 
