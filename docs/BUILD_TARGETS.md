@@ -1,63 +1,171 @@
-# Understanding Build Targets: sw_emu, hw_emu, hw
+# Understanding Build Targets: HLS C Sim, hw_emu, hw
 
-## Overview
+## IMPORTANT: sw_emu Deprecation Notice
 
-Vitis supports three build targets for iterative development:
+**Starting Vitis 2024.2:** Software emulation (sw_emu) is DEPRECATED and will be removed in Vitis 2025.1.
 
-| Target | Build Time | Purpose | What It Does |
-|--------|-----------|---------|--------------|
-| **sw_emu** | 1-5 min | Functional testing | Runs kernel as CPU code |
-| **hw_emu** | 30-60 min | Performance validation | Full HLS synthesis + RTL simulation |
-| **hw** | 2-6 hours | Production | Full FPGA place & route |
+**New Workflow for Alveo/Data Center Cards:**
+- **HLS C Simulation** - Fast kernel-only functional testing (seconds to minutes)
+- **hw_emu** - Full system simulation with accurate hardware behavior (30-60 minutes)
+- **hw** - Production bitstream for actual FPGA (2-6 hours)
 
-**Key insight:** Use the right target at the right time to save days of development time.
+**Migration Guide:**
+- Replace all `sw_emu` usage with **HLS C Simulation** for kernel testing
+- Use `hw_emu` for full system verification (host + kernel interaction)
+- See Xilinx Answer Record 000036790 for details
 
 ---
 
-## sw_emu (Software Emulation)
+## Overview
 
-### "Does it work?"
+Vitis supports the following development flow for Alveo/data center applications:
+
+| Stage | Tool/Target | Build Time | Purpose | What It Does |
+|-------|------------|-----------|---------|--------------|
+| **Kernel Testing** | HLS C Sim | Seconds | Functional correctness | Tests kernel function in isolation with C++ testbench |
+| **System Testing** | hw_emu | 30-60 min | Full system validation | HLS synthesis + RTL simulation + host code |
+| **Deployment** | hw | 2-6 hours | Production | Full FPGA place & route bitstream |
+
+**Key insight:** Use HLS C Sim for rapid iteration, hw_emu for system verification, hw for deployment.
+
+---
+
+## HLS C Simulation (Recommended for Kernel Testing)
+
+### "Does my kernel function work?"
 
 **What happens:**
 ```
-Your C++ kernel → Compiled as CPU code → Runs on host processor
+Your kernel function → Compiled with g++ → Tested with C++ testbench → Runs natively on CPU
+```
+
+### Characteristics
+-  **Very Fast:** Seconds to compile and run
+-  **Where:** Pure C++ compilation (no Xilinx tools needed)
+-  **Good for:** Kernel logic correctness, debugging, rapid iteration
+-  **Not good for:** Testing host-kernel interaction, XRT API testing
+
+### When to Use
+
+**Initial kernel development - Test kernel logic in isolation**
+
+```bash
+# Create simple testbench to test your kernel function
+cat > kernel_test.cpp << 'EOF'
+#include "kernel.h"
+#include <iostream>
+#include <cassert>
+
+int main() {
+    // Prepare test data
+    const int N = 100;
+    int input[N], output[N], expected[N];
+
+    for (int i = 0; i < N; i++) {
+        input[i] = i;
+        expected[i] = i * 2;  // Whatever your kernel should compute
+    }
+
+    // Call kernel function directly (no XRT, no host code)
+    my_kernel(input, output, N);
+
+    // Verify results
+    for (int i = 0; i < N; i++) {
+        assert(output[i] == expected[i] && "Kernel output mismatch!");
+    }
+
+    std::cout << "PASS: All tests passed!" << std::endl;
+    return 0;
+}
+EOF
+
+# Compile and run (takes seconds!)
+g++ -std=c++14 -I. kernel.cpp kernel_test.cpp -o test
+./test
+```
+
+**Advantages:**
+- **Fastest iteration:** Seconds instead of minutes
+- **Standard C++ debugging:** Use gdb, valgrind, AddressSanitizer
+- **No Xilinx overhead:** Pure C++ compilation
+- **Isolates kernel logic:** Test your algorithm without XRT complexity
+- **CI/CD friendly:** Easy to automate in test pipelines
+
+### Example Workflow
+
+```bash
+# 1. Write kernel function
+vim kernel.cpp
+
+# 2. Write testbench
+vim kernel_test.cpp
+
+# 3. Compile and test (seconds!)
+g++ -std=c++14 -I. kernel.cpp kernel_test.cpp -o test && ./test
+
+# 4. Found a bug? Fix and retest immediately (only 2-3 seconds!)
+vim kernel.cpp
+g++ -std=c++14 -I. kernel.cpp kernel_test.cpp -o test && ./test
+
+# 5. Debug with gdb if needed
+g++ -g -std=c++14 -I. kernel.cpp kernel_test.cpp -o test
+gdb ./test
+(gdb) break my_kernel
+(gdb) run
+(gdb) print input[0]
+```
+
+**Typical iterations:** 20-100+ times during initial kernel development
+
+**When to move on:** Once your kernel logic is correct with HLS C Sim, move to hw_emu to test the full system (host + kernel + XRT).
+
+---
+
+## sw_emu (Software Emulation) - DEPRECATED
+
+**DEPRECATED:** Starting Vitis 2024.2, this target is deprecated and will be REMOVED in Vitis 2025.1.
+
+**Migration:** Use **HLS C Simulation** (above) for kernel functional testing instead.
+
+### Why Deprecated?
+
+Xilinx is streamlining the development flow:
+- **Old:** sw_emu → hw_emu → hw
+- **New:** HLS C Sim → hw_emu → hw
+
+HLS C Simulation is faster, uses standard C++ tools, and better isolates kernel logic.
+
+### Legacy Information (for reference only)
+
+<details>
+<summary>Click to expand legacy sw_emu documentation</summary>
+
+### "Does it work?" (Legacy)
+
+**What happens:**
+```
+Your C++ kernel → Compiled as CPU code → Runs with XRT emulation
 ```
 
 ### Characteristics
 -  **Fast:** 1-5 minutes to build
 -  **Where:** Runs on CPU (no FPGA synthesis)
--  **Good for:** Algorithm correctness, debugging logic
--  **Not good for:** Performance estimation, resource usage
+-  **Good for:** Algorithm correctness (DEPRECATED - use HLS C Sim)
+-  **Not good for:** New projects (will be removed in 2025.1)
 
-### When to Use
+### When to Use (Legacy)
 
- **Initial development**
+**Do NOT use for new projects.** Use HLS C Simulation instead.
+
+If you must use it for legacy reasons:
 ```bash
 ./fpga_build_template.sh -p dev -k kernel -s kernel.cpp -t sw_emu -c
 ./fpga_run_template.sh -p dev -x results/kernels/kernel.xo -H host.cpp -t sw_emu -c
 ```
 
- **Rapid bug fixing** - Fix bugs in minutes, not hours
- **Testing new algorithms** - Validate correctness quickly
- **Debugging host-kernel communication**
+**Migration note:** If you see deprecation warnings, switch to HLS C Sim + hw_emu workflow.
 
-### Example Workflow
-
-```bash
-# Write kernel
-vim kernel.cpp
-
-# Test quickly
-./fpga_build_template.sh -t sw_emu -p test -k kernel -s kernel.cpp -c
-./fpga_run_template.sh -t sw_emu -p test -x results/kernels/kernel.xo -H host.cpp -c
-
-# Found a bug? Fix and repeat (only takes 2-3 minutes!)
-vim kernel.cpp
-./fpga_build_template.sh -t sw_emu -p test -k kernel -s kernel.cpp -c
-./fpga_run_template.sh -t sw_emu -p test -x results/kernels/kernel.xo -H host.cpp -c
-```
-
-**Typical iterations:** 10-50 times during initial development
+</details>
 
 ---
 
@@ -173,47 +281,77 @@ tar -czf final_v1.0_hw.tar.gz results/ *.xclbin
 
 ---
 
-## Recommended Development Flow
+## Recommended Development Flow (NEW - Vitis 2024.2+)
 
 ```
-┌────────────────────────────────────────────┐
-│  Phase 1: Algorithm Development            │
-│  Target: sw_emu (minutes)                  │
-│  Goal: Get it working                      │
-│  Iterations: 10-50                         │
-├────────────────────────────────────────────┤
-│  • Write initial kernel (no pragmas)       │
-│  • Test with small datasets                │
-│  • Fix bugs rapidly                        │
-│  • Test edge cases                         │
-│  • Verify correctness                      │
-└──────────────┬─────────────────────────────┘
+┌─────────────────────────────────────────────────────────────┐
+│  Phase 1: Rapid Algorithm Development                       │
+│  Tool: g++ (standard C++ compiler)                          │
+│  Time: Seconds per iteration                                │
+│  Goal: Get kernel logic working                             │
+│  Iterations: 20-100+                                        │
+├─────────────────────────────────────────────────────────────┤
+│  • Write kernel function (no HLS pragmas yet)               │
+│  • Write C++ testbench                                      │
+│  • Compile: g++ kernel.cpp test.cpp -o test                 │
+│  • Test and debug with standard C++ tools (gdb, valgrind)   │
+│  • Fix bugs in SECONDS (not minutes!)                       │
+│  • Test edge cases and verify algorithm correctness         │
+└──────────────┬──────────────────────────────────────────────┘
                ↓
-┌────────────────────────────────────────────┐
-│  Phase 2: Optimization                     │
-│  Target: hw_emu (hours)                    │
-│  Goal: Make it fast                        │
-│  Iterations: 5-15                          │
-├────────────────────────────────────────────┤
-│  • Add PIPELINE pragmas                    │
-│  • Add ARRAY_PARTITION pragmas             │
-│  • Check resource usage                    │
-│  • Validate performance                    │
-│  • Balance resources vs performance        │
-└──────────────┬─────────────────────────────┘
+┌─────────────────────────────────────────────────────────────┐
+│  Phase 2: Synthesizability Validation                       │
+│  Tool: vitis_hls (C Simulation)                             │
+│  Time: 1-5 minutes                                          │
+│  Goal: Verify code CAN BE SYNTHESIZED to hardware           │
+│  Iterations: 1-3 times (only when algorithm is correct)     │
+├─────────────────────────────────────────────────────────────┤
+│  • Add HLS pragmas (PIPELINE, ARRAY_PARTITION, etc.)        │
+│  • Run vitis_hls csim to CHECK SYNTHESIZABILITY             │
+│  • Catch HLS-specific issues (unsupported C++ features)     │
+│  • Fix pragma errors and synthesis warnings                 │
+│  • Validate pragmas don't break functionality               │
+│  • (Optional) Capture waveforms if needed                   │
+└──────────────┬──────────────────────────────────────────────┘
                ↓
-┌────────────────────────────────────────────┐
-│  Phase 3: Production                       │
-│  Target: hw (days)                         │
-│  Goal: Deploy                              │
-│  Iterations: 1-3                           │
-├────────────────────────────────────────────┤
-│  • Build final bitstream                   │
-│  • Test on real hardware                   │
-│  • Measure actual performance              │
-│  • Archive for deployment                  │
-└────────────────────────────────────────────┘
+┌─────────────────────────────────────────────────────────────┐
+│  Phase 3: System Integration & Optimization                 │
+│  Tool: v++ hw_emu                                           │
+│  Time: 30-60 minutes per build                              │
+│  Goal: Optimize hardware implementation                     │
+│  Iterations: 5-15                                           │
+├─────────────────────────────────────────────────────────────┤
+│  • Build with hw_emu (full HLS synthesis + RTL simulation)  │
+│  • Check resource usage (LUT, FF, BRAM, DSP)                │
+│  • Test host + kernel interaction with XRT                  │
+│  • Validate performance estimates                           │
+│  • Tune pragmas to balance resources vs throughput          │
+└──────────────┬──────────────────────────────────────────────┘
+               ↓
+┌─────────────────────────────────────────────────────────────┐
+│  Phase 4: Production Deployment                             │
+│  Tool: v++ hw                                               │
+│  Time: 2-6 hours per build                                  │
+│  Goal: Deploy to FPGA hardware                              │
+│  Iterations: 1-3                                            │
+├─────────────────────────────────────────────────────────────┤
+│  • Build final bitstream (full place & route)               │
+│  • Test on real FPGA hardware                               │
+│  • Measure actual performance                               │
+│  • Archive bitstream for deployment                         │
+└─────────────────────────────────────────────────────────────┘
 ```
+
+### Key Differences Between Tools
+
+| Phase | Tool | Purpose | What it Validates |
+|-------|------|---------|-------------------|
+| 1 | **g++** | Algorithm correctness | Does my logic work? |
+| 2 | **vitis_hls csim** | Synthesizability | Can this be turned into hardware? |
+| 3 | **hw_emu** | System integration | Does it fit? How fast is it? |
+| 4 | **hw** | Production | Real hardware performance |
+
+**Important:** Phase 2 (vitis_hls csim) is for **checking synthesizability**, NOT just testing. Use g++ for rapid testing.
 
 ---
 

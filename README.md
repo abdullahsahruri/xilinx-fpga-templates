@@ -9,6 +9,24 @@ Automate your FPGA development workflow with battle-tested scripts that handle H
 
 ---
 
+## NEW: Recommended 4-Phase Workflow (Vitis 2024.2+)
+
+**sw_emu is DEPRECATED.** Use the new workflow for faster iteration:
+
+```
+Phase 1: g++ (seconds) → Phase 2: vitis_hls csim (minutes) →
+Phase 3: hw_emu (hours) → Phase 4: hw (production)
+```
+
+- **Phase 1 (g++):** Test kernel logic - 20-100+ iterations in seconds
+- **Phase 2 (vitis_hls csim):** Validate synthesizability - 1-3 validations before hw_emu
+- **Phase 3 (hw_emu):** System integration and optimization
+- **Phase 4 (hw):** Production deployment
+
+See [CSIM_GUIDE.md](docs/CSIM_GUIDE.md) for complete workflow details.
+
+---
+
 ## Features
 
 - **Simple Commands** - Build kernels with a single command

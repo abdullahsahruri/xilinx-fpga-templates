@@ -191,6 +191,36 @@ run_hls_synthesis() {
     print_info "Target: ${TARGET}"
     print_info "Build directory: ${TMP_BUILD_DIR}"
 
+    # Check for sw_emu deprecation
+    if [ "${TARGET}" == "sw_emu" ]; then
+        echo ""
+        echo "╔═══════════════════════════════════════════════════════════════════════╗"
+        echo "║                          DEPRECATION WARNING                          ║"
+        echo "╠═══════════════════════════════════════════════════════════════════════╣"
+        echo "║  sw_emu is DEPRECATED starting Vitis 2024.2                           ║"
+        echo "║  sw_emu will be REMOVED in Vitis 2025.1                               ║"
+        echo "║                                                                       ║"
+        echo "║  RECOMMENDED: Use HLS C Simulation instead                            ║"
+        echo "║    g++ -std=c++14 -I. kernel.cpp kernel_test.cpp -o test && ./test   ║"
+        echo "║                                                                       ║"
+        echo "║  Benefits:                                                            ║"
+        echo "║    - 60x faster (seconds vs minutes)                                  ║"
+        echo "║    - Standard C++ debugging (gdb, valgrind)                           ║"
+        echo "║    - No Xilinx tool overhead                                          ║"
+        echo "║    - CI/CD friendly                                                   ║"
+        echo "║                                                                       ║"
+        echo "║  Migration Guide: docs/SW_EMU_MIGRATION.md                            ║"
+        echo "║  Xilinx Answer Record: 000036790                                      ║"
+        echo "╚═══════════════════════════════════════════════════════════════════════╝"
+        echo ""
+        read -p "Continue with deprecated sw_emu build? (y/N): " -n 1 -r
+        echo
+        if [[ ! $REPLY =~ ^[Yy]$ ]]; then
+            print_info "Build cancelled. Please migrate to HLS C Simulation."
+            exit 0
+        fi
+    fi
+
     # Change to project directory (where source files are)
     cd "${PROJECT_DIR}"
 

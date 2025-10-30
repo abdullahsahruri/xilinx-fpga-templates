@@ -19,62 +19,104 @@ Result:   [0, 3, 6, 9, ...]
 ## Files
 
 - `vector_add.cpp` - HLS kernel (runs on FPGA)
-- `host.cpp` - Host application (runs on CPU, controls FPGA)
+- `test_vadd.cpp` - Standalone testbench for Phase 1 & 2
+- `csim.tcl` - Vitis HLS C Simulation script for Phase 2
+- `host.cpp` - XRT host application for Phase 3 & 4 (runs on CPU, controls FPGA)
 - `README.md` - This file
 
 ## Quick Start
 
 ### Prerequisites
 
-- Xilinx Vitis installed
-- Alveo board (U200, U250, U280, etc.) or emulation environment
-- Templates from parent directory
+- **Phase 1:** Standard C++ compiler (g++)
+- **Phase 2:** Vitis HLS (optional, for synthesizability validation)
+- **Phase 3 & 4:** Xilinx Vitis installed, Alveo board (U200, U250, U280, etc.)
 
-### Option 1: Software Emulation (Fastest - Minutes)
+## Recommended 4-Phase Workflow
 
-Test functionality without hardware synthesis:
+### Phase 1: Rapid Algorithm Development with g++ (Seconds)
+
+**Goal:** Get kernel logic working - iterate 20-100+ times rapidly
 
 ```bash
 cd examples/vector_add
 
-# Build kernel (sw_emu)
-../../fpga_build_template.sh \
-    -p vector_add \
-    -k vadd \
-    -s vector_add.cpp \
-    -b u200 \
-    -t sw_emu \
-    -c
+# Compile with standard g++ (NO Xilinx tools needed!)
+g++ -std=c++14 -O2 -I. vector_add.cpp test_vadd.cpp -o test_vadd
 
-# Link and run
-../../fpga_run_template.sh \
-    -p vector_add \
-    -x "results/kernels/vadd.xo" \
-    -H host.cpp \
-    -B u200 \
-    -t sw_emu \
-    -c
+# Run test
+./test_vadd
 ```
 
 **Expected output:**
 ```
-=== Vector Addition Example ===
-[1/5] Loading FPGA device...
-[2/5] Loading xclbin...
-[3/5] Creating kernel...
-[4/5] Allocating buffers and preparing data...
-[5/5] Executing kernel...
+=== Vector Addition Testbench (g++) ===
+Phase 1: Algorithm validation - Seconds per iteration
+
+[1/4] Preparing test data...
+[2/4] Executing kernel...
+[3/4] Verifying results...
+[4/4] Test complete
 
 === Results ===
 TEST PASSED! All 4096 elements verified.
+
+Sample values:
+  in1[0] + in2[0] = 0 + 0 = 0
+  in1[10] + in2[10] = 10 + 20 = 30
+  in1[100] + in2[100] = 100 + 200 = 300
 ```
 
-### Option 2: Hardware Emulation (Slower - ~1 Hour)
+**Why this phase?**
+- Test algorithm correctness in SECONDS
+- Use standard C++ debuggers (gdb, valgrind)
+- No FPGA tool overhead
+- Iterate quickly until logic is perfect
 
-Validate performance and resource usage:
+---
+
+### Phase 2: Validate Synthesizability with vitis_hls csim (Minutes)
+
+**Goal:** Verify code CAN BE SYNTHESIZED to hardware (1-3 validations before hw_emu)
 
 ```bash
-# Build kernel (hw_emu)
+# Run Vitis HLS C Simulation (checks synthesizability)
+vitis_hls -f csim.tcl
+```
+
+**Expected output:**
+```
+INFO: [HLS 200-10] Running 'csim_design'
+INFO: [SIM 211-2] *************** CSIM start ***************
+INFO: [SIM 211-4] CSIM will launch GCC as the compiler.
+   Compiling ../../../../test_vadd.cpp in debug mode
+   Compiling ../../../../vector_add.cpp in debug mode
+   Generating csim.exe
+=== Vector Addition Testbench (g++) ===
+TEST PASSED! All 4096 elements verified.
+INFO: [SIM 211-1] CSim done with 0 errors.
+INFO: [SIM 211-3] *************** CSIM finish ***************
+```
+
+**What this validates:**
+- HLS pragma syntax is correct (PIPELINE, INTERFACE, etc.)
+- No unsupported C++ features (dynamic memory, file I/O)
+- Data types are synthesizable
+- Code can be turned into hardware
+
+**When to run:**
+- After algorithm works in Phase 1
+- Before spending hours on hw_emu
+- When you change HLS pragmas
+
+---
+
+### Phase 3: Hardware Emulation (~1 Hour)
+
+**Goal:** Validate resource usage and system integration
+
+```bash
+# Build kernel (hw_emu performs full HLS synthesis)
 ../../fpga_build_template.sh \
     -p vector_add \
     -k vadd \
@@ -96,12 +138,19 @@ cat results/reports/vector_add/vadd/system_estimate_vadd.xtxt
     -c
 ```
 
-### Option 3: Hardware Build (Slowest - 2-6 Hours)
+**What this validates:**
+- Resource usage (LUTs, FFs, BRAM, DSP)
+- Memory bandwidth and timing
+- System integration with XRT host
 
-Build for actual FPGA hardware:
+---
+
+### Phase 4: Hardware Build (2-6 Hours)
+
+**Goal:** Production deployment to real FPGA
 
 ```bash
-# Build kernel (hw)
+# Build for actual FPGA hardware
 ../../fpga_build_template.sh \
     -p vector_add \
     -k vadd \
@@ -119,6 +168,24 @@ Build for actual FPGA hardware:
     -t hw \
     -c
 ```
+
+---
+
+## Legacy: Software Emulation (DEPRECATED)
+
+<details>
+<summary>Click to expand legacy sw_emu instructions (DEPRECATED in Vitis 2024.2)</summary>
+
+**NOTE:** sw_emu is deprecated as of Vitis 2024.2 and removed in 2025.1.
+Use Phase 1 (g++) and Phase 2 (vitis_hls csim) instead.
+
+```bash
+# Old approach (DEPRECATED)
+../../fpga_build_template.sh -t sw_emu ...
+```
+
+See [docs/SW_EMU_MIGRATION.md](../../docs/SW_EMU_MIGRATION.md) for migration guide.
+</details>
 
 ## Understanding the Code
 
