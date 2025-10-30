@@ -128,6 +128,7 @@ FPGA development with Xilinx Vitis is powerful but complex:
 xilinx-fpga-templates/
 ├── fpga_build_template.sh        # Build kernels (C++ → .xo)
 ├── fpga_run_template.sh          # Link + compile + run
+├── fpga_cleanup_builds.sh        # Clean /tmp build files
 ├── README.md                     # This file
 ├── docs/
 │   ├── QUICK_START.md           # Installation & basic usage
@@ -172,6 +173,34 @@ cd examples/vector_add
 3. **Enable auto-cleanup** - Use `-c` flag to conserve disk space
 4. **Check resources early** - Run `grep "LUT" results/reports/*/system_estimate*.xtxt` after hw_emu
 5. **Skip unchanged steps** - Use `--skip-link` when only host code has been modified
+
+---
+
+## Cleaning Up Build Files
+
+After extracting resource data from builds, clean up temporary files to free disk space:
+
+```bash
+# Interactive cleanup (recommended)
+./fpga_cleanup_builds.sh
+
+# Automatic cleanup (no confirmation)
+./fpga_cleanup_builds.sh --all
+
+# Clean only old builds (older than 7 days)
+./fpga_cleanup_builds.sh --older-than 7
+
+# See what would be deleted without deleting
+./fpga_cleanup_builds.sh --dry-run
+```
+
+The script will:
+- Display all build directories in `/tmp/${USER}_fpga_builds/`
+- Show size and age of each directory
+- Safely remove selected directories
+- Report total space freed
+
+**Important:** Only run cleanup AFTER you've extracted all resource data you need from the builds. Once deleted, resource reports cannot be recovered.
 
 ---
 
@@ -242,8 +271,9 @@ platforminfo --list  # Check available platforms
 
 **"Disk quota exceeded"**
 ```bash
-rm -rf /tmp/${USER}_fpga_builds/*  # Clean temp files
-./fpga_build_template.sh ... -c     # Use auto-cleanup
+./fpga_cleanup_builds.sh              # Clean old temp files interactively
+./fpga_cleanup_builds.sh --all        # Clean all temp files automatically
+./fpga_cleanup_builds.sh --older-than 7  # Clean builds older than 7 days
 ```
 
 **"Routing failed - too many LUTs"**

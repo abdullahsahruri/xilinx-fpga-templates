@@ -258,11 +258,25 @@ extract_results() {
         print_success "Copied ${KERNEL_NAME}.xo to results"
     fi
 
-    # Copy HLS reports
-    local reports_src="${TMP_BUILD_DIR}/_x/reports"
-    if [ -d "${reports_src}" ]; then
-        cp -r "${reports_src}" "${RESULTS_DIR}/reports/${PROJECT_NAME}"
-        print_success "Copied HLS reports to results"
+    # Copy HLS reports (try both locations: v++ puts reports in ${TMP_BUILD_DIR}/reports/)
+    local reports_found=0
+
+    # First try: ${TMP_BUILD_DIR}/reports/ (where v++ actually puts them)
+    if [ -d "${TMP_BUILD_DIR}/reports" ]; then
+        cp -r "${TMP_BUILD_DIR}/reports" "${RESULTS_DIR}/reports/${PROJECT_NAME}"
+        print_success "Copied HLS reports from ${TMP_BUILD_DIR}/reports/"
+        reports_found=1
+    fi
+
+    # Second try: ${TMP_BUILD_DIR}/_x/reports/ (legacy location)
+    if [ -d "${TMP_BUILD_DIR}/_x/reports" ] && [ $reports_found -eq 0 ]; then
+        cp -r "${TMP_BUILD_DIR}/_x/reports" "${RESULTS_DIR}/reports/${PROJECT_NAME}"
+        print_success "Copied HLS reports from ${TMP_BUILD_DIR}/_x/reports/"
+        reports_found=1
+    fi
+
+    if [ $reports_found -eq 0 ]; then
+        print_info "No HLS reports found (this is normal for sw_emu)"
     fi
 
     # Copy logs
@@ -271,12 +285,38 @@ extract_results() {
         print_success "Copied build log to results"
     fi
 
-    # Extract resource utilization if available
-    local system_estimate="${TMP_BUILD_DIR}/_x/reports/${KERNEL_NAME}/system_estimate_${KERNEL_NAME}.xtxt"
-    if [ -f "${system_estimate}" ]; then
-        print_info "Resource Utilization:"
-        grep -A 2 "hdc_kernel_integrated_1.*hdc_kernel_integrated.*hdc_kernel_integrated" "${system_estimate}" || \
-        grep -E "FF|LUT|BRAM|DSP|URAM" "${system_estimate}" | head -5
+    # Extract and display resource utilization (try both locations)
+    local system_estimate=""
+
+    # Try finding system estimate report
+    if [ -d "${TMP_BUILD_DIR}/reports" ]; then
+        system_estimate=$(find "${TMP_BUILD_DIR}/reports" -name "system_estimate_*.xtxt" 2>/dev/null | head -1)
+    fi
+
+    if [ -z "${system_estimate}" ] && [ -d "${TMP_BUILD_DIR}/_x/reports" ]; then
+        system_estimate=$(find "${TMP_BUILD_DIR}/_x/reports" -name "system_estimate_*.xtxt" 2>/dev/null | head -1)
+    fi
+
+    if [ -n "${system_estimate}" ] && [ -f "${system_estimate}" ]; then
+        print_info "Found system estimate: ${system_estimate}"
+        print_info "Resource Utilization Summary:"
+        echo ""
+
+        # Save to a summary file
+        local resource_summary="${RESULTS_DIR}/reports/${PROJECT_NAME}_resources.txt"
+        echo "Resource Utilization for ${KERNEL_NAME}" > "${resource_summary}"
+        echo "Generated: $(date)" >> "${resource_summary}"
+        echo "===========================================" >> "${resource_summary}"
+        cat "${system_estimate}" >> "${resource_summary}"
+
+        # Display key resource lines
+        grep -E "BRAM|DSP|FF|LUT|URAM" "${system_estimate}" | head -10 || \
+        cat "${system_estimate}" | head -20
+
+        echo ""
+        print_success "Full resource report saved to: ${resource_summary}"
+    else
+        print_info "No system estimate report found (normal for sw_emu target)"
     fi
 
     print_success "Results extraction complete"
