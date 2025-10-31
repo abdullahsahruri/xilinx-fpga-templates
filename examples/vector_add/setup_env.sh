@@ -20,12 +20,12 @@ case $PHASE in
         ;;
 
     2)
-        echo "Phase 2: vitis_hls csim"
+        echo "Phase 2: vitis-run --mode hls (csim)"
         echo ""
 
         # Check if Vitis is already sourced
-        if command -v vitis_hls &> /dev/null; then
-            echo "Vitis HLS already available: $(which vitis_hls)"
+        if command -v vitis-run &> /dev/null; then
+            echo "Vitis HLS already available: $(which vitis-run)"
         else
             # Common Vitis installation paths
             VITIS_PATHS=(
@@ -55,7 +55,7 @@ case $PHASE in
 
         echo ""
         echo "Ready to run:"
-        echo "  vitis_hls -f csim.tcl"
+        echo "  vitis-run --mode hls --tcl csim.tcl"
         ;;
 
     3|4)
@@ -115,7 +115,7 @@ case $PHASE in
         echo "ERROR: Invalid phase: $PHASE"
         echo "Usage: source setup_env.sh [1|2|3|4]"
         echo "  1 = Phase 1 (g++)"
-        echo "  2 = Phase 2 (vitis_hls csim)"
+        echo "  2 = Phase 2 (vitis-run --mode hls)"
         echo "  3 = Phase 3 (hw_emu)"
         echo "  4 = Phase 4 (hw)"
         return 1

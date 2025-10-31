@@ -14,12 +14,12 @@ Automate your FPGA development workflow with battle-tested scripts that handle H
 **sw_emu is DEPRECATED.** Use the new workflow for faster iteration:
 
 ```
-Phase 1: g++ (seconds) → Phase 2: vitis_hls csim (minutes) →
+Phase 1: g++ (seconds) → Phase 2: vitis-run hls (minutes) →
 Phase 3: hw_emu (hours) → Phase 4: hw (production)
 ```
 
 - **Phase 1 (g++):** Test kernel logic - 20-100+ iterations in seconds
-- **Phase 2 (vitis_hls csim):** Validate synthesizability - 1-3 validations before hw_emu
+- **Phase 2 (vitis-run hls):** Validate synthesizability - 1-3 validations before hw_emu
 - **Phase 3 (hw_emu):** System integration and optimization
 - **Phase 4 (hw):** Production deployment
 
@@ -113,7 +113,7 @@ FPGA development with Xilinx Vitis is powerful but complex:
 | **hw_emu** | 30-60 min | Performance validation | Optimization, resource checking (Phase 3) |
 | **hw** | 2-6 hours | Production | Final deployment (Phase 4) |
 
-**Development workflow:** g++ (iterate) → vitis_hls csim (validate) → hw_emu (optimize) → hw (deploy)
+**Development workflow:** g++ (iterate) → vitis-run hls (validate) → hw_emu (optimize) → hw (deploy)
 
 **Time savings:** Using g++ + csim instead of hw_emu for early iterations is **60x faster**.
 

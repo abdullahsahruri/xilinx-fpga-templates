@@ -1,7 +1,7 @@
 # Vitis HLS C Simulation Script
 # Phase 2: Validate synthesizability before hw_emu
 #
-# Usage: vitis_hls -f csim.tcl
+# Usage: vitis-run --mode hls --tcl csim.tcl
 #
 # This validates that your kernel can be synthesized to hardware:
 # - Checks for unsupported C++ features

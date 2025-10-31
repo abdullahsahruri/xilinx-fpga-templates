@@ -7,9 +7,9 @@ When developing FPGA kernels, you have two complementary approaches for testing:
 | Approach | Tool | Speed | Purpose |
 |----------|------|-------|---------|
 | **Manual C++ Sim** | g++ | Seconds | Rapid algorithm iteration |
-| **HLS C Simulation** | vitis_hls | 1-5 min | Validate synthesizability |
+| **HLS C Simulation** | vitis-run hls | 1-5 min | Validate synthesizability |
 
-**Best Practice:** Use **both** - g++ for rapid iteration, vitis_hls csim for validation.
+**Best Practice:** Use **both** - g++ for rapid iteration, vitis-run hls for validation.
 
 ---
 
@@ -29,10 +29,10 @@ When developing FPGA kernels, you have two complementary approaches for testing:
                ↓
 ┌─────────────────────────────────────────────────────────────┐
 │  Phase 2: Synthesizability Validation                       │
-│  Tool: vitis_hls (HLS C Simulation)                         │
+│  Tool: vitis-run --mode hls (HLS C Simulation)                         │
 │  Time: 1-5 minutes                                          │
 ├─────────────────────────────────────────────────────────────┤
-│  vitis_hls -f csim.tcl                                      │
+│  vitis-run --mode hls --tcl csim.tcl                                      │
 │  • Run 1-3 times (when algorithm is correct)                │
 │  • Checks: Can this code be synthesized to hardware?        │
 │  • Catches: Unsupported C++ features, pragma errors         │
@@ -121,7 +121,7 @@ g++ -std=c++14 -O2 kernel.cpp test.cpp -o test && ./test  # Only 3 seconds!
 
 ---
 
-## Phase 2: vitis_hls csim - Synthesizability Validation
+## Phase 2: vitis-run hls - Synthesizability Validation
 
 ### When to Use
 
@@ -132,7 +132,7 @@ g++ -std=c++14 -O2 kernel.cpp test.cpp -o test && ./test  # Only 3 seconds!
 
 ### What It Checks
 
-vitis_hls csim validates that your code **can be synthesized to hardware**:
+vitis-run hls validates that your code **can be synthesized to hardware**:
 
 - **Unsupported C++ features** (dynamic memory, file I/O, etc.)
 - **Pragma errors** (incorrect PIPELINE, ARRAY_PARTITION usage)
@@ -165,10 +165,10 @@ exit
 
 ```bash
 # Method 1: Using TCL script
-vitis_hls -f csim.tcl
+vitis-run --mode hls --tcl csim.tcl
 
 # Method 2: Interactive (for debugging)
-vitis_hls
+vitis-run --mode hls
 # In HLS console:
 open_project my_kernel_hls
 add_files kernel.cpp
@@ -215,7 +215,7 @@ void my_kernel(int* in, int* out, int size) {
 }
 ```
 
-Running vitis_hls csim will validate:
+Running vitis-run hls will validate:
 - Interface pragmas are correct
 - PIPELINE pragma can be applied
 - Code is synthesizable
@@ -263,7 +263,7 @@ int main() {
 g++ -std=c++14 -O2 vadd_kernel.cpp vadd_test.cpp -o test && ./test
 ```
 
-### Step 2: Add HLS Pragmas and Validate with vitis_hls (2 runs, 4 minutes total)
+### Step 2: Add HLS Pragmas and Validate with vitis-run hls (2 runs, 4 minutes total)
 
 ```cpp
 // vadd_kernel.cpp - With HLS pragmas
@@ -298,7 +298,7 @@ exit
 EOF
 
 # Run HLS C Simulation
-vitis_hls -f csim.tcl
+vitis-run --mode hls --tcl csim.tcl
 
 # Output:
 # INFO: [SIM 1] CSim done with 0 errors.
@@ -350,7 +350,7 @@ Total: 16 hours wasted
 ### Right Approach: Use all 4 phases
 ```
 Phase 1: g++ iterations (50x @ 5 sec) = 4 minutes → Algorithm correct
-Phase 2: vitis_hls csim (2x @ 2 min) = 4 minutes → Synthesizable
+Phase 2: vitis-run hls (2x @ 2 min) = 4 minutes → Synthesizable
 Phase 3: hw_emu (3x @ 45 min) = 2.25 hours → Optimized
 Phase 4: hw build (1x @ 4 hrs) = 4 hours → Deployed
 
@@ -362,32 +362,32 @@ Saved: 9.5 hours (60% faster!)
 
 ## Common Questions
 
-### Q: Do I always need both g++ and vitis_hls csim?
+### Q: Do I always need both g++ and vitis-run hls?
 
 **A:** Depends on your confidence level:
 
 - **New kernel, learning HLS:** Use both (g++ for iterations, csim for validation)
 - **Experienced developer, simple kernel:** g++ might be enough
-- **Complex pragmas, unsure of synthesizability:** Definitely use vitis_hls csim
+- **Complex pragmas, unsure of synthesizability:** Definitely use vitis-run hls
 
-### Q: Can I skip vitis_hls csim and go straight to hw_emu?
+### Q: Can I skip vitis-run hls and go straight to hw_emu?
 
 **A:** You can, but it's risky:
 - hw_emu takes 30-60 minutes
 - If there's a synthesizability issue, you waste time
-- vitis_hls csim only takes 2-5 minutes and catches issues early
+- vitis-run hls only takes 2-5 minutes and catches issues early
 
-### Q: What if vitis_hls csim passes but hw_emu fails?
+### Q: What if vitis-run hls passes but hw_emu fails?
 
 **A:** This can happen with:
 - Resource constraints (too many LUTs/BRAM)
 - Timing issues (clock frequency too high)
 - These are optimization issues, not synthesizability issues
 
-### Q: Can vitis_hls csim replace hw_emu?
+### Q: Can vitis-run hls replace hw_emu?
 
 **A:** No! They serve different purposes:
-- **vitis_hls csim:** Validates synthesizability
+- **vitis-run hls:** Validates synthesizability
 - **hw_emu:** Validates resource usage, performance, and system integration
 
 ---
@@ -401,8 +401,8 @@ Saved: 9.5 hours (60% faster!)
 | First time writing kernel | g++ | `g++ kernel.cpp test.cpp -o test` |
 | Debugging algorithm | g++ | `g++ -g kernel.cpp test.cpp && gdb ./test` |
 | Testing edge cases | g++ | `g++ kernel.cpp test.cpp -o test && ./test` |
-| Added HLS pragmas | vitis_hls csim | `vitis_hls -f csim.tcl` |
-| Before hw_emu | vitis_hls csim | `vitis_hls -f csim.tcl` |
+| Added HLS pragmas | vitis-run hls | `vitis-run --mode hls --tcl csim.tcl` |
+| Before hw_emu | vitis-run hls | `vitis-run --mode hls --tcl csim.tcl` |
 | Checking resources | hw_emu | `./fpga_build_template.sh -t hw_emu` |
 | System integration | hw_emu | `./fpga_build_template.sh -t hw_emu` |
 | Production | hw | `./fpga_build_template.sh -t hw` |
@@ -410,7 +410,7 @@ Saved: 9.5 hours (60% faster!)
 ### Typical Iteration Counts
 
 - **g++:** 20-100+ iterations (seconds each)
-- **vitis_hls csim:** 1-3 iterations (minutes each)
+- **vitis-run hls:** 1-3 iterations (minutes each)
 - **hw_emu:** 5-15 iterations (30-60 min each)
 - **hw:** 1-3 builds (2-6 hours each)
 
@@ -419,7 +419,7 @@ Saved: 9.5 hours (60% faster!)
 ## Next Steps
 
 - **Practice:** Start with g++ for your next kernel
-- **Validate:** Use vitis_hls csim before hw_emu
+- **Validate:** Use vitis-run hls before hw_emu
 - **Optimize:** Use hw_emu for resource tuning
 - **Deploy:** Build hw only when confident
 

@@ -301,13 +301,13 @@ tar -czf final_v1.0_hw.tar.gz results/ *.xclbin
                ↓
 ┌─────────────────────────────────────────────────────────────┐
 │  Phase 2: Synthesizability Validation                       │
-│  Tool: vitis_hls (C Simulation)                             │
+│  Tool: vitis-run --mode hls (C Simulation)                             │
 │  Time: 1-5 minutes                                          │
 │  Goal: Verify code CAN BE SYNTHESIZED to hardware           │
 │  Iterations: 1-3 times (only when algorithm is correct)     │
 ├─────────────────────────────────────────────────────────────┤
 │  • Add HLS pragmas (PIPELINE, ARRAY_PARTITION, etc.)        │
-│  • Run vitis_hls csim to CHECK SYNTHESIZABILITY             │
+│  • Run vitis-run hls to CHECK SYNTHESIZABILITY             │
 │  • Catch HLS-specific issues (unsupported C++ features)     │
 │  • Fix pragma errors and synthesis warnings                 │
 │  • Validate pragmas don't break functionality               │
@@ -347,11 +347,11 @@ tar -czf final_v1.0_hw.tar.gz results/ *.xclbin
 | Phase | Tool | Purpose | What it Validates |
 |-------|------|---------|-------------------|
 | 1 | **g++** | Algorithm correctness | Does my logic work? |
-| 2 | **vitis_hls csim** | Synthesizability | Can this be turned into hardware? |
+| 2 | **vitis-run hls** | Synthesizability | Can this be turned into hardware? |
 | 3 | **hw_emu** | System integration | Does it fit? How fast is it? |
 | 4 | **hw** | Production | Real hardware performance |
 
-**Important:** Phase 2 (vitis_hls csim) is for **checking synthesizability**, NOT just testing. Use g++ for rapid testing.
+**Important:** Phase 2 (vitis-run hls) is for **checking synthesizability**, NOT just testing. Use g++ for rapid testing.
 
 ---
 

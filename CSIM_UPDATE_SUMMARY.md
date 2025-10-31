@@ -4,21 +4,21 @@
 
 ## Summary
 
-Added comprehensive documentation for the complete 4-phase FPGA development workflow, clarifying the roles of g++ and vitis_hls csim.
+Added comprehensive documentation for the complete 4-phase FPGA development workflow, clarifying the roles of g++ and vitis-run hls.
 
 ## Key Question Answered
 
-**"Is g++ or vitis_hls csim recommended?"**
+**"Is g++ or vitis-run hls recommended?"**
 
 **Answer:** **Both!** They serve different purposes:
 - **g++ (Phase 1):** Rapid algorithm iteration (20-100+ iterations in seconds)
-- **vitis_hls csim (Phase 2):** Validate synthesizability (1-3 times before hw_emu)
+- **vitis-run hls (Phase 2):** Validate synthesizability (1-3 times before hw_emu)
 
 ## New 4-Phase Workflow
 
 ```
 Phase 1: g++ (seconds)           → Algorithm correctness
-Phase 2: vitis_hls csim (minutes) → Synthesizability validation
+Phase 2: vitis-run hls (minutes) → Synthesizability validation
 Phase 3: hw_emu (hours)          → System integration
 Phase 4: hw (production)         → Deployment
 ```
@@ -28,16 +28,16 @@ Phase 4: hw (production)         → Deployment
 ### 1. docs/CSIM_GUIDE.md (NEW - 400+ lines)
 
 Comprehensive guide covering:
-- When to use g++ vs vitis_hls csim
+- When to use g++ vs vitis-run hls
 - Complete workflow with examples
-- TCL script templates for vitis_hls
+- TCL script templates for vitis-run hls
 - Time comparisons
 - Common questions (FAQ)
 - Quick reference table
 
 **Key sections:**
 - Phase 1: g++ rapid development (seconds per iteration)
-- Phase 2: vitis_hls csim synthesizability check (validates HLS pragmas)
+- Phase 2: vitis-run hls synthesizability check (validates HLS pragmas)
 - Phase 3: hw_emu system integration (resource usage)
 - Phase 4: hw production (deployment)
 
@@ -48,8 +48,8 @@ Comprehensive guide covering:
 ### 2. docs/BUILD_TARGETS.md
 
 Updated workflow diagram to show 4 phases:
-- Added clear distinction between g++ (Phase 1) and vitis_hls csim (Phase 2)
-- Emphasized that vitis_hls csim is for **checking synthesizability**
+- Added clear distinction between g++ (Phase 1) and vitis-run hls (Phase 2)
+- Emphasized that vitis-run hls is for **checking synthesizability**
 - Added comparison table showing purpose of each phase
 
 ### 3. README.md
@@ -60,15 +60,15 @@ Added prominent notice at top:
 
 **sw_emu is DEPRECATED.** Use the new workflow for faster iteration:
 
-Phase 1: g++ (seconds) → Phase 2: vitis_hls csim (minutes) →
+Phase 1: g++ (seconds) → Phase 2: vitis-run hls (minutes) →
 Phase 3: hw_emu (hours) → Phase 4: hw (production)
 ```
 
 ## Key Messages
 
-### What vitis_hls csim Does (Phase 2)
+### What vitis-run hls Does (Phase 2)
 
-vitis_hls csim **validates synthesizability** - it checks:
+vitis-run hls **validates synthesizability** - it checks:
 - Unsupported C++ features (dynamic memory, file I/O)
 - HLS pragma errors (PIPELINE, ARRAY_PARTITION issues)
 - Interface problems (m_axi, s_axilite pragma errors)
@@ -87,7 +87,7 @@ g++ is for **algorithm testing**:
 | Tool | When | Why |
 |------|------|-----|
 | **g++** | Every iteration | Test algorithm logic (20-100+ times) |
-| **vitis_hls csim** | Before hw_emu | Validate synthesizability (1-3 times) |
+| **vitis-run hls** | Before hw_emu | Validate synthesizability (1-3 times) |
 | **hw_emu** | After csim passes | Check resources (5-15 times) |
 | **hw** | Production | Deploy to FPGA (1-3 times) |
 
@@ -105,7 +105,7 @@ done
 vim kernel.cpp  # Add #pragma HLS PIPELINE, etc.
 
 # Create csim.tcl and run
-vitis_hls -f csim.tcl  # 2 minutes - validates pragmas
+vitis-run --mode hls --tcl csim.tcl  # 2 minutes - validates pragmas
 
 # Phase 3: System integration (5 iterations, 4 hours total)
 ./fpga_build_template.sh -t hw_emu ...  # 45 min each
@@ -126,7 +126,7 @@ hw build attempts: 4 × 4 hours = 16 hours
 **With 4-phase workflow:**
 ```
 Phase 1 (g++):          4 minutes
-Phase 2 (vitis_hls):    4 minutes
+Phase 2 (vitis-run hls):    4 minutes
 Phase 3 (hw_emu):       4 hours
 Phase 4 (hw):           4 hours
 ────────────────────────────────
@@ -138,17 +138,17 @@ Saved: 8 hours (50% faster!)
 ## Common Misconceptions Addressed
 
 ### ❌ Misconception 1
-"I should just use vitis_hls csim for all testing"
+"I should just use vitis-run hls for all testing"
 
-✅ **Reality:** vitis_hls csim takes 1-5 minutes. Use g++ (seconds) for iteration, then validate with csim.
+✅ **Reality:** vitis-run hls takes 1-5 minutes. Use g++ (seconds) for iteration, then validate with csim.
 
 ### ❌ Misconception 2
 "g++ testing is not the 'official' way"
 
-✅ **Reality:** Both are valid. g++ for development, vitis_hls csim for validation. Use both!
+✅ **Reality:** Both are valid. g++ for development, vitis-run hls for validation. Use both!
 
 ### ❌ Misconception 3
-"I can skip vitis_hls csim and go straight to hw_emu"
+"I can skip vitis-run hls and go straight to hw_emu"
 
 ✅ **Reality:** You can, but if there's a synthesizability issue, you waste 45 minutes. csim catches it in 2 minutes.
 
@@ -156,7 +156,7 @@ Saved: 8 hours (50% faster!)
 
 ```
 docs/
-├── CSIM_GUIDE.md           ← NEW: Complete g++ vs vitis_hls guide
+├── CSIM_GUIDE.md           ← NEW: Complete g++ vs vitis-run hls guide
 ├── BUILD_TARGETS.md        ← UPDATED: 4-phase workflow
 ├── SW_EMU_MIGRATION.md     ← Existing: sw_emu migration
 ├── HLS_TUTORIAL.md         ← Existing: HLS basics
@@ -170,9 +170,9 @@ docs/
 g++ -std=c++14 -O2 kernel.cpp test.cpp -o test && ./test
 ```
 
-### Phase 2: vitis_hls csim (Synthesizability)
+### Phase 2: vitis-run hls (Synthesizability)
 ```bash
-vitis_hls -f csim.tcl  # Uses testbench, validates pragmas
+vitis-run --mode hls --tcl csim.tcl  # Uses testbench, validates pragmas
 ```
 
 ### Phase 3: hw_emu (System Integration)
@@ -196,7 +196,7 @@ vitis_hls -f csim.tcl  # Uses testbench, validates pragmas
 
 The templates now provide clear guidance on:
 1. **When to use g++** (rapid testing, Phase 1)
-2. **When to use vitis_hls csim** (synthesizability validation, Phase 2)
+2. **When to use vitis-run hls** (synthesizability validation, Phase 2)
 3. **Why both are important** (different purposes, complementary)
 4. **Complete workflow** (4 phases with time estimates)
 

@@ -264,7 +264,7 @@ For optimal development speed, use the **NEW 4-phase workflow** that replaces de
 
 ```
 Phase 1: g++ (seconds)        → Algorithm correctness
-Phase 2: vitis_hls csim (min) → Synthesizability validation
+Phase 2: vitis-run hls (min) → Synthesizability validation
 Phase 3: hw_emu (hours)       → System integration
 Phase 4: hw (production)      → Deployment
 ```

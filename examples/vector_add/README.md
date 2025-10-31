@@ -76,13 +76,13 @@ Sample values:
 
 ---
 
-### Phase 2: Validate Synthesizability with vitis_hls csim (Minutes)
+### Phase 2: Validate Synthesizability with vitis-run hls (Minutes)
 
 **Goal:** Verify code CAN BE SYNTHESIZED to hardware (1-3 validations before hw_emu)
 
 ```bash
 # Run Vitis HLS C Simulation (checks synthesizability)
-vitis_hls -f csim.tcl
+vitis-run --mode hls --tcl csim.tcl
 ```
 
 **Expected output:**
@@ -181,7 +181,7 @@ cat results/reports/vector_add/vadd/system_estimate_vadd.xtxt
 <summary>Click to expand legacy sw_emu instructions (DEPRECATED in Vitis 2024.2)</summary>
 
 **NOTE:** sw_emu is deprecated as of Vitis 2024.2 and removed in 2025.1.
-Use Phase 1 (g++) and Phase 2 (vitis_hls csim) instead.
+Use Phase 1 (g++) and Phase 2 (vitis-run hls) instead.
 
 ```bash
 # Old approach (DEPRECATED)

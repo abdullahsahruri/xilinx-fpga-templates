@@ -25,7 +25,7 @@ g++ -std=c++14 -O2 -I. vector_add.cpp test_vadd.cpp -o test_vadd && ./test_vadd
 **Usage:**
 ```bash
 # Phase 2: Check if code can be synthesized
-vitis_hls -f csim.tcl
+vitis-run --mode hls --tcl csim.tcl
 ```
 
 **What it validates:**
@@ -41,7 +41,7 @@ vitis_hls -f csim.tcl
 1. Added Phase 1 & 2 files to Files section
 2. Replaced old 3-option workflow with 4-phase workflow:
    - **Phase 1:** g++ (Seconds) - Algorithm development
-   - **Phase 2:** vitis_hls csim (Minutes) - Synthesizability validation
+   - **Phase 2:** vitis-run hls (Minutes) - Synthesizability validation
    - **Phase 3:** hw_emu (Hours) - System integration
    - **Phase 4:** hw (Production) - Real hardware
 3. Moved sw_emu to deprecated section with migration guide link
@@ -57,7 +57,7 @@ g++ -std=c++14 -O2 -I. vector_add.cpp test_vadd.cpp -o test_vadd
 # Output: TEST PASSED! All 4096 elements verified. (in seconds)
 
 # Phase 2: Validate synthesizability (run 1-3 times)
-vitis_hls -f csim.tcl
+vitis-run --mode hls --tcl csim.tcl
 # Output: CSim done with 0 errors. (in 1-5 minutes)
 
 # Phase 3: System integration (run 5-10 times)
@@ -92,7 +92,7 @@ vitis_hls -f csim.tcl
    - No FPGA tool licensing issues
    - CI/CD friendly
 
-2. **Phase 2 (vitis_hls csim):**
+2. **Phase 2 (vitis-run hls):**
    - Catches synthesizability issues early
    - Validates HLS pragmas before long builds
    - Prevents wasted hours on hw_emu with bad pragmas

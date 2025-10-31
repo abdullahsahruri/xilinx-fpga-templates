@@ -183,10 +183,10 @@ if [ "$MODE" = "sw_emu" ]; then
     echo "  sw_emu was removed in Vitis 2025.1"
     echo ""
     echo "  Use Phase 1 & 2 workflow instead:"
-    echo "    Phase 1 (g++):        Fast C++ testing (seconds)"
-    echo "    Phase 2 (vitis_hls):  HLS C Simulation (minutes)"
-    echo "    Phase 3 (hw_emu):     Hardware emulation (hours)"
-    echo "    Phase 4 (hw):         Hardware build (production)"
+    echo "    Phase 1 (g++):           Fast C++ testing (seconds)"
+    echo "    Phase 2 (vitis-run hls): HLS C Simulation (minutes)"
+    echo "    Phase 3 (hw_emu):        Hardware emulation (hours)"
+    echo "    Phase 4 (hw):            Hardware build (production)"
     return 1
 fi
 
